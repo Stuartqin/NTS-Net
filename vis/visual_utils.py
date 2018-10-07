@@ -57,5 +57,10 @@ if __name__ == '__main__':
         _, concat_logits, _, _, _ = net(img.cuda())
         part_imgs = net.part_imgs
         print(len(part_imgs))
+        for i, part_img in enumerate(part_imgs):
+            _img = part_img.cpu().numpy()
+            _img = Image.fromarray(_img, mode='RGB')
+            _img.save('images/part_{0}.jpg'.format(i))
+
         # print(len(concat_logits))
     # plot显示出来
