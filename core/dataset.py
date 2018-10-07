@@ -72,7 +72,7 @@ class OwnDataset():
     '''Define your own data reading class here, 
     we promise to divide the data set into two parts, train, test two sub data sets
     
-    the folder structure as follows:
+    the dataset structure as follows:
 
     ./dataset
         /train
