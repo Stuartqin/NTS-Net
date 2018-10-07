@@ -14,6 +14,7 @@ import torchvision
 from torchvision import transforms
 from PIL import Image
 import argparse
+import cv2
 
 if __name__ == '__main__':
 
@@ -50,17 +51,19 @@ if __name__ == '__main__':
     img = Image.fromarray(img, mode='RGB')
     img = transforms.Resize(INPUT_SIZE, Image.BILINEAR)(img)
     img = transforms.ToTensor()(img)
+    img_np = img.numpy()
     img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(img)
     img = torch.from_numpy(np.expand_dims(img.numpy(), axis=0))
-    print(img.shape)
+    # print(img.shape)
     with torch.no_grad():
         _, concat_logits, _, _, _ = net(img.cuda())
-        part_imgs = net.part_imgs
-        print(len(part_imgs))
-        for i, part_img in enumerate(part_imgs):
-            _img = part_img.cpu().numpy()
-            _img = Image.fromarray(_img, mode='RGB')
-            _img.save('images/part_{0}.jpg'.format(i))
-
-        # print(len(concat_logits))
-    # plot显示出来
+        coordinates = net.top_n_index[0]
+        # print(coordinates)
+        for i, coordinate in enumerate(coordinates):
+            img_orig = img_np
+            print(img_orig.shape)
+            # print(coordinate)
+            ymin, xmin, ymax, xmax = int(coordinate[1]), int(coordinate[2]), int(coordinate[3]), int(coordinate[4])
+            print(ymin, xmin, ymax, xmax)
+            cv2.rectangle(img_orig, (int(xmin), int(ymin)), (int(xmax), int(ymax)), 1)
+            cv2.imwrite('images/part_img_{0}.jpg'.format(i), img_orig)

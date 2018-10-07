@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+sys.path.append('.')
 from config import INPUT_SIZE
 
 _default_anchors_setting = (

@@ -46,7 +46,7 @@ class attention_net(nn.Module):
         _, edge_anchors, _ = generate_default_anchor_maps()
         self.pad_side = 224
         self.edge_anchors = (edge_anchors + 224).astype(np.int)
-        self.part_imgs = None
+        self.top_n_index = None
 
     def forward(self, x):
         resnet_out, rpn_feature, feature = self.pretrained_model(x)
@@ -58,8 +58,10 @@ class attention_net(nn.Module):
             np.concatenate((x.reshape(-1, 1), self.edge_anchors.copy(), np.arange(0, len(x)).reshape(-1, 1)), axis=1)
             for x in rpn_score.data.cpu().numpy()]
         top_n_cdds = [hard_nms(x, topn=self.topN, iou_thresh=0.25) for x in all_cdds]
+        self.top_n_index = top_n_cdds
         top_n_cdds = np.array(top_n_cdds)
         top_n_index = top_n_cdds[:, :, -1].astype(np.int64) # when running code, here went a error, change np.int to np.int64,parameter index of torch.gather() appoint longtensortype when change num_worker to 4,then it runs on windows or linux correctly
+        # self.top_n_index = top_n_cdds[:, :, -1].astype(np.int32)
         top_n_index = torch.from_numpy(top_n_index).cuda()
         top_n_prob = torch.gather(rpn_score, dim=1, index=top_n_index)
         part_imgs = torch.zeros([batch, self.topN, 3, 224, 224]).cuda()
